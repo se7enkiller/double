@@ -56,6 +56,7 @@
 import Form from 'vform'
 import Cookies from 'js-cookie'
 import LoginWithGithub from '~/components/LoginWithGithub'
+import axios from 'axios'
 
 export default {
   components: {
@@ -76,7 +77,18 @@ export default {
     remember: false
   }),
 
+  mounted: function () {
+    this.checkToken()
+  },
+
   methods: {
+    async checkToken () {
+      // const token = store.getters['auth/token']
+      const { data } = await axios.post('/api/getToken')
+
+      console.log('token', data)
+    },
+
     async login () {
       // Submit the form.
       const { data } = await this.form.post('/api/login')

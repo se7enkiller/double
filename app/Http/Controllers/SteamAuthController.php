@@ -5,11 +5,13 @@ namespace App\Http\Controllers;
 use App\Providers\RouteServiceProvider;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Ilzrv\LaravelSteamAuth\SteamAuth;
 use Ilzrv\LaravelSteamAuth\SteamData;
 
 class SteamAuthController extends Controller
 {
+    use AuthenticatesUsers;
     /**
      * The SteamAuth instance.
      *
@@ -55,8 +57,25 @@ class SteamAuthController extends Controller
             $this->firstOrCreate($data),
             true
         );
+        $user = $this->firstOrCreate($data);
+        $dataAttempt = [
+            'name' => $user->name,
+            'password' => $user->steam_id
+        ];
+        $token = $this->guard()->attempt($dataAttempt);
+        $this->guard()->setToken($token);
+        session(['token' => $token]);
 
         return redirect($this->redirectTo);
+    }
+
+    public function getToken()
+    {
+        $token = session('token');
+        if (!$token) {
+            return response()->json(['token' => $token]);
+        }
+        return 'true';
     }
 
     /**
@@ -71,9 +90,8 @@ class SteamAuthController extends Controller
             'steam_id' => $data->getSteamId(),
         ], [
             'name' => $data->getPersonaName(),
-            'avatar' => $data->getAvatarFull(),
-            'player_level' => $data->getPlayerLevel(),
-            // ...and other what you need
+            'password' => bcrypt($data->getSteamId()),
+            'photo_url' => $data->getAvatarFull(),
         ]);
     }
 }

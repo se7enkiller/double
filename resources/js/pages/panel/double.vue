@@ -169,6 +169,8 @@ import Vue from 'vue'
 import Form from 'vform'
 import { mapGetters } from 'vuex'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import WS from '../../services/ws'
+
 Vue.component('Icon', FontAwesomeIcon)
 
 export default {
@@ -225,7 +227,8 @@ export default {
       allPlayers: [],
       redBets: 0,
       greenBets: 0,
-      blackBets: 0
+      blackBets: 0,
+      connection: null
     }
   },
 
@@ -238,6 +241,18 @@ export default {
     this.form.keys().forEach(key => {
       this.form[key] = this.user[key]
     })
+    this.connection = WS
+
+    this.connection.onmessage = function (event) {
+      console.log(event)
+    }
+
+    console.log('created')
+
+    this.connection.onopen = function (event) {
+      console.log(event)
+      console.log('Successfully connected to the echo websocket server...')
+    }
   },
 
   mounted: function () {
@@ -364,6 +379,8 @@ export default {
         if (button === 'green') {
           this.green = parseInt(this.form.bet)
         }
+        console.log(this.connection)
+        this.connection.send(button)
         this.changeBoxes()
         this.user.balance = this.user.balance - this.form.bet
         this.updateBalance(button)

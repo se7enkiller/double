@@ -24,7 +24,9 @@ class User extends Authenticatable implements JWTSubject //, MustVerifyEmail
         'name',
         'email',
         'password',
-        'balance'
+        'balance',
+        'steam_id',
+        'photo_url'
     ];
 
     /**
